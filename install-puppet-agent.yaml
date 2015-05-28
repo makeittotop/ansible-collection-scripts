@@ -10,15 +10,6 @@
   - name: install puppet client 
     yum: name=puppet state=present
 
-    notify:
-      - test puppet-master in /etc/puppet/puppet.conf
-      - insert puppet-master line in the /etc/puppet/puppet.conf file
-      - uncomment log line in /etc/sysconfig/puppet file
-      - test for puppet-master entry in /etc/hosts
-      - insert puppet-master line in the /etc/hosts file
-      - start puppet service
-    
-  handlers:
   - name: test puppet-master in /etc/puppet/puppet.conf
     shell: cat /etc/puppet/puppet.conf | grep -i "server = puppet-master" | wc -l
     register: test_grep
