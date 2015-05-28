@@ -1,0 +1,22 @@
+---
+- hosts: '{{ hosts }}'
+  remote_user: root
+
+  vars: 
+    essential_yum_packages: [python-pip.noarch, htop.x86_64, python-ipython.noarch, lynx.x86_64, telnet.x86_64, redis.x86_64]
+
+  tasks:
+  - name: install the latest version of a bunch of import tools
+    yum: name={{ item }} state=latest
+    register: package_state
+    with_items: essential_yum_packages
+    ignore_errors: True
+
+  - name: save the result in a hash with current time as the key
+    shell: redis-cli -h lic -p 4444 -n 1 hset "{{ inventory_hostname }}_essentials" "$(date +%F-%T)" "{{ package_state }}"
+    register: redis_hash
+    
+  - name: save the hash in a set 
+    shell: redis-cli -h lic -p 4444 -n 1 sadd essentials "{{ inventory_hostname }}_essentials" 
+    register: redis_set
+    

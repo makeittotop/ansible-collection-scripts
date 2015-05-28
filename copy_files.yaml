@@ -1,0 +1,14 @@
+---
+- hosts: '{{ hosts }}'
+  remote_user: root
+
+  vars: 
+    copy_items: [/home/abhishek/dev/python/rmanpy_zombie/kill_hung_proc.py]
+
+  tasks:
+  - name: copy item from the given list to the `hosts`
+    copy: src={{ item }} dest=~/ owner=root group=root mode=0744
+    register: copy_result
+    with_items: copy_items
+    ignore_errors: True
+

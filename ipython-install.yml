@@ -1,0 +1,26 @@
+---
+- hosts: prod
+  remote_user: root
+  tasks:
+  #- name: copy ipython rpms to blades
+  #  action: copy src=./ipython-rpm
+  #    dest=~/ owner=root
+
+  - name: install ipython and pip
+    command: yum -y install python-ipython.noarch python-pip htop
+
+  #- name: install ipython
+  #  command: yum install *
+  #  args:
+  #    chdir: ~/ipython-rpm
+
+  - name: install argparse module
+    command: pip install argparse
+
+  #- name: install python argparse module
+  #  command: python setup.py install
+  #  args:
+  #    chdir: ~/argparse-1.3.0
+
+  - name: confirm ipython is installed
+    command: ipython --version

@@ -1,0 +1,12 @@
+---
+- hosts: '{{ hosts }}'
+  remote_user: root
+
+  #vars: 
+  #  copy_items: [/home/abhishek/dev/python/rmanpy_zombie/kill_hung_proc.py]
+
+  tasks:
+  - name: kill hung maya procs
+    shell: /root/kill_hung_proc.py #echo "foo" #/root/kill_hung_proc.py
+    register: result
+

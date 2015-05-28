@@ -1,0 +1,44 @@
+---
+- hosts: '{{ hosts }}'
+  remote_user: root
+
+  tasks:
+  - name: install Puppet repo through yum
+    yum: name=http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm state=present
+    ignore_errors: True
+
+  - name: install puppet client 
+    yum: name=puppet state=present
+
+    notify:
+      - test puppet-master in /etc/puppet/puppet.conf
+      - insert puppet-master line in the /etc/puppet/puppet.conf file
+      - uncomment log line in /etc/sysconfig/puppet file
+      - test for puppet-master entry in /etc/hosts
+      - insert puppet-master line in the /etc/hosts file
+      - start puppet service
+    
+  handlers:
+  - name: test puppet-master in /etc/puppet/puppet.conf
+    shell: cat /etc/puppet/puppet.conf | grep -i "server = puppet-master" | wc -l
+    register: test_grep
+      
+  - name: insert puppet-master line in the /etc/puppet/puppet.conf file 
+    lineinfile: dest=/etc/puppet/puppet.conf line='\n    server = puppet-master\n' backup=yes state=present
+    when: test_grep.stdout == '0'
+     
+  - name: uncomment log line in /etc/sysconfig/puppet file 
+    lineinfile: dest=/etc/sysconfig/puppet regexp="#PUPPET_LOG" line='PUPPET_LOG=/var/log/puppet/puppet.log' backup=yes state=present
+
+  - name: test for puppet-master entry in /etc/hosts
+    shell: cat /etc/hosts | grep -i "172.16.15.25 puppet-master" | wc -l
+    register: test_grep
+      
+  - name: insert puppet-master line in the /etc/hosts file 
+    lineinfile: dest=/etc/hosts line='\n172.16.15.25 puppet-master\n' backup=yes state=present
+    when: test_grep.stdout == '0'
+     
+  - name: start puppet service
+    service: name=puppet state=stopped enabled=yes    
+
+    
