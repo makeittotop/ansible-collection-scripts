@@ -3,7 +3,7 @@
   remote_user: root
 
   tasks:
-  - name: install Puppet repo through yum
+  - name: install puppet repo through yum
     yum: name=http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm state=present
     ignore_errors: True
 
@@ -29,7 +29,10 @@
     lineinfile: dest=/etc/hosts line='\n172.16.15.25 puppet-master\n' backup=yes state=present
     when: test_grep.stdout == '0'
      
-  - name: start puppet service
-    service: name=puppet state=stopped enabled=yes    
+  - name: run the puppet agent in verbose, non-daemonize mode so that it could ask the master for ssl cert signing 
+    command: /usr/bin/puppet agent --test     
+    ignore_errors: True
 
+  - name: start the puppet service and enable it post boot automatically 
+    service: name=puppet state=started enabled=yes
     
