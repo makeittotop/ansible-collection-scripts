@@ -1,0 +1,25 @@
+---
+- hosts: '{{ hosts }}'
+  remote_user: root
+  gather_facts: no
+
+  tasks:
+  - name: test puppet-master in /etc/puppet/puppet.conf
+    shell: cat /etc/puppet/puppet.conf | grep -i "server = puppet-master" | wc -l
+    register: test_grep
+      
+  - name: insert nagios.barajoun.local line in the /etc/puppet/puppet.conf file 
+    lineinfile: dest=/etc/puppet/puppet.conf regexp="puppet-master" line='    server = nagios.barajoun.local' backup=yes state=present
+    when: test_grep.stdout == '1'
+     
+  - name: test for puppet-master entry in /etc/hosts
+    shell: cat /etc/hosts | grep -i "172.16.15.25 puppet-master" | wc -l
+    register: test_grep
+      
+  - name: insert puppet-master line in the /etc/hosts file 
+    lineinfile: dest=/etc/hosts regexp="puppet-master" line='172.16.15.25 nagios.barajoun.local' backup=yes state=present
+    when: test_grep.stdout == '1'
+     
+  - name: start the puppet service and enable it post boot automatically 
+    service: name=puppet state=restarted
+    
